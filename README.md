@@ -134,6 +134,15 @@ An example file is provided at `tracks.example.txt`.
 - Allow multiple canvases per track (mood variants, etc.).
 - Daily/weekly automated enrichment using authenticated sources (opt-in).
 
+## Attribution
+
+This project retrieves canvas video data using Spotify's internal (undocumented) Canvas API endpoints.
+
+**Spotify AB** is the owner of all canvas videos, track metadata, and the underlying API.  
+This project is **not affiliated with, endorsed by, or sponsored by Spotify AB**.
+
+Spotify, the Spotify logo, and Spotify Canvas are trademarks of Spotify AB.
+
 ## License
 
 Licensed under the GNU General Public License v3.0 (GPL-3.0).

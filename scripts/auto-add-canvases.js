@@ -2,16 +2,20 @@
 /**
  * AuraMusicCanvas - Auto fetch + add script
  *
- * Usage:
- *   node scripts/auto-add-canvases.js --input tracks.txt
- *   node scripts/auto-add-canvases.js --input tracks.txt --auto-import
+ * Providers:
+ *   local     → Self-hosted Spotify-Canvas-API (default)
+ *   paxsenix  → Hosted Paxsenix API (api.paxsenix.org)
  *
- * tracks.txt format (one per line, # comments allowed):
+ * Usage examples:
+ *   node scripts/auto-add-canvases.js --input tracks.txt
+ *   node scripts/auto-add-canvases.js --input tracks.txt --provider paxsenix --auto-import
+ *
+ * For Paxsenix provider, set the environment variable:
+ *   PAXSENIX_API_KEY=sk-paxsenix-...
+ *
+ * tracks.txt format:
  *   40j4RoqmLiivqzRObbQ4BF
  *   0VjIjW4GlUZAMYd2vXMi3b   # Blinding Lights
- *
- * Requires the Spotify-Canvas-API to be running locally:
- *   cd ~/Spotify-Canvas-API && node index.js
  */
 
 const fs = require('fs');
@@ -20,28 +24,40 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 const MANIFEST_PATH = path.join(__dirname, '..', 'public', 'canvas.json');
+
+// Config
+const PROVIDER = (process.env.PROVIDER || 'local').toLowerCase();
+const PAXSENIX_API_KEY = process.env.PAXSENIX_API_KEY || '';
 const CANVAS_API = process.env.CANVAS_API || 'http://localhost:3000';
 
 function parseArgs() {
   const args = process.argv.slice(2);
   const inputIdx = args.indexOf('--input');
   const inputFile = inputIdx !== -1 ? args[inputIdx + 1] : null;
+
+  const providerIdx = args.indexOf('--provider');
+  const cliProvider = providerIdx !== -1 ? args[providerIdx + 1] : null;
+
   const autoImport = args.includes('--auto-import') || args.includes('--import');
   const dryRun = args.includes('--dry-run');
 
   if (!inputFile) {
     console.error(`
 Usage:
-  node scripts/auto-add-canvases.js --input tracks.txt [--auto-import] [--dry-run]
+  node scripts/auto-add-canvases.js --input tracks.txt [--provider local|paxsenix] [--auto-import] [--dry-run]
 
 Examples:
-  node scripts/auto-add-canvases.js --input my-tracks.txt
-  node scripts/auto-add-canvases.js --input my-tracks.txt --auto-import
+  node scripts/auto-add-canvases.js --input tracks.txt
+  node scripts/auto-add-canvases.js --input tracks.txt --provider paxsenix --auto-import
+
+For Paxsenix provider, set PAXSENIX_API_KEY in your environment or .env file.
 `);
     process.exit(1);
   }
 
-  return { inputFile, autoImport, dryRun };
+  const finalProvider = cliProvider || PROVIDER;
+
+  return { inputFile, provider: finalProvider, autoImport, dryRun };
 }
 
 function readTrackIds(filePath) {
@@ -50,34 +66,67 @@ function readTrackIds(filePath) {
     .split('\n')
     .map(line => line.trim())
     .filter(line => line && !line.startsWith('#'))
-    .map(line => line.split(/\s+/)[0]); // take first token (the ID)
+    .map(line => line.split(/\s+/)[0]);
 }
 
-function httpGet(url) {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function httpRequest(options, data = null) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'AuraMusicCanvas/1.0' } }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
-            resolve(JSON.parse(data));
+            resolve(JSON.parse(body));
           } catch (e) {
-            reject(new Error('Invalid JSON from ' + url));
+            reject(new Error('Invalid JSON response'));
           }
         } else {
-          reject(new Error(`HTTP ${res.statusCode} from ${url}`));
+          reject(new Error(`HTTP ${res.statusCode}: ${body}`));
         }
       });
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    if (data) req.write(data);
+    req.end();
   });
 }
 
-async function getCanvasData(trackId) {
-  const url = `${CANVAS_API}/api/canvas?trackId=${trackId}`;
+async function getCanvasData(trackId, provider) {
   try {
-    const res = await httpGet(url);
+    let url, options;
+
+    if (provider === 'paxsenix') {
+      if (!PAXSENIX_API_KEY) {
+        throw new Error('PAXSENIX_API_KEY environment variable is required when using --provider paxsenix');
+      }
+      url = `https://api.paxsenix.org/spotify/canvas?id=${trackId}`;
+      options = {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${PAXSENIX_API_KEY}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'AuraMusicCanvas/1.0'
+        }
+      };
+    } else {
+      // Local self-hosted
+      url = `${CANVAS_API}/api/canvas?trackId=${trackId}`;
+      options = {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'AuraMusicCanvas/1.0'
+        }
+      };
+    }
+
+    const res = await httpRequest(options);
     const list = res.canvasesList || res.data?.canvasesList || [];
+
     if (list.length === 0) return null;
 
     const first = list[0];
@@ -93,10 +142,13 @@ async function getCanvasData(trackId) {
 }
 
 async function getTrackInfo(trackId) {
-  // Use Spotify oEmbed (no auth required)
   const oembedUrl = `https://open.spotify.com/oembed?url=https://open.spotify.com/track/${trackId}`;
   try {
-    const data = await httpGet(oembedUrl);
+    const options = {
+      method: 'GET',
+      headers: { 'User-Agent': 'AuraMusicCanvas/1.0' }
+    };
+    const data = await httpRequest(options);
     return {
       title: data.title || 'Unknown',
       artist: data.author_name || 'Unknown Artist',
@@ -107,21 +159,23 @@ async function getTrackInfo(trackId) {
   }
 }
 
-async function processTracks(trackIds) {
+async function processTracks(trackIds, provider) {
   const results = [];
+  const isPaxsenix = provider === 'paxsenix';
+  const delay = isPaxsenix ? 1200 : 300; // Be nicer to hosted API
 
   for (const trackId of trackIds) {
     process.stdout.write(`→ Processing ${trackId} ... `);
 
-    const canvas = await getCanvasData(trackId);
+    const canvas = await getCanvasData(trackId, provider);
     if (!canvas || !canvas.canvasUrl) {
       console.log('no canvas');
+      await sleep(delay);
       continue;
     }
 
     const info = await getTrackInfo(trackId);
 
-    // Prefer artist from canvas response if available
     const artist = canvas.artistName || info.artist;
 
     const entry = {
@@ -133,6 +187,8 @@ async function processTracks(trackIds) {
 
     results.push(entry);
     console.log(`found: ${artist} - ${info.title}`);
+
+    await sleep(delay);
   }
 
   return results;
@@ -170,10 +226,20 @@ function importToManifest(entries, dryRun) {
 }
 
 async function main() {
-  const { inputFile, autoImport, dryRun } = parseArgs();
+  const { inputFile, provider, autoImport, dryRun } = parseArgs();
+
+  if (provider === 'paxsenix' && !PAXSENIX_API_KEY) {
+    console.error('Error: PAXSENIX_API_KEY environment variable must be set when using --provider paxsenix');
+    process.exit(1);
+  }
 
   console.log(`AuraMusicCanvas Auto-Add`);
-  console.log(`Using Canvas API: ${CANVAS_API}`);
+  console.log(`Provider: ${provider}`);
+  if (provider === 'paxsenix') {
+    console.log(`Using hosted Paxsenix API`);
+  } else {
+    console.log(`Using Canvas API: ${CANVAS_API}`);
+  }
   console.log(`Input file: ${inputFile}\n`);
 
   const trackIds = readTrackIds(inputFile);
@@ -184,7 +250,7 @@ async function main() {
 
   console.log(`Found ${trackIds.length} track ID(s) to check.\n`);
 
-  const newEntries = await processTracks(trackIds);
+  const newEntries = await processTracks(trackIds, provider);
 
   if (newEntries.length > 0) {
     console.log(`\nFound ${newEntries.length} canvas(es) with valid URLs.`);

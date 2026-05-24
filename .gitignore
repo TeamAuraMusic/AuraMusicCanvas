@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Temporary import files
+new-canvases.json
+*.tmp.json

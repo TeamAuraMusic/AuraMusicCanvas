@@ -1,0 +1,15 @@
+{
+  "name": "auramusiccanvas",
+  "version": "1.0.0",
+  "description": "Public Spotify Canvas manifest for AuraMusic - https://github.com/TeamAuraMusic/AuraMusicCanvas",
+  "license": "GPL-3.0",
+  "private": true,
+  "scripts": {
+    "add": "node scripts/add-canvas.js",
+    "import": "node scripts/add-canvas.js --import",
+    "validate": "node -e \"JSON.parse(require('fs').readFileSync('public/canvas.json')) && console.log('✅ Valid JSON')\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,32 @@
+name: Validate Canvas Manifest
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate JSON
+        run: npm run validate
+
+      - name: Check schema
+        run: |
+          node -e '
+            const manifest = JSON.parse(require("fs").readFileSync("public/canvas.json"));
+            if (!manifest.items || !Array.isArray(manifest.items)) {
+              console.error("❌ Missing items array");
+              process.exit(1);
+            }
+            console.log(`✅ Manifest valid — ${manifest.items.length} entries`);
+          '

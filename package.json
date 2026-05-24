@@ -10,12 +10,7 @@
     "auto-add": "node scripts/auto-add-canvases.js",
     "validate": "node -e \"JSON.parse(require('fs').readFileSync('public/canvas.json')) && console.log('✅ Valid JSON')\""
   },
-  "dependencies": {
-    "axios": "^1.6.0",
-    "otpauth": "^9.0.0",
-    "dotenv": "^16.0.0",
-    "google-protobuf": "^3.21.2"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=18"
   }

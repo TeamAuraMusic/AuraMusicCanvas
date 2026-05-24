@@ -7,6 +7,7 @@
   "scripts": {
     "add": "node scripts/add-canvas.js",
     "import": "node scripts/add-canvas.js --import",
+    "auto-add": "node scripts/auto-add-canvases.js",
     "validate": "node -e \"JSON.parse(require('fs').readFileSync('public/canvas.json')) && console.log('✅ Valid JSON')\""
   },
   "engines": {

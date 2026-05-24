@@ -81,6 +81,34 @@ Place a file `new-canvases.json` with the same shape as the manifest items array
 node scripts/add-canvas.js --import new-canvases.json
 ```
 
+### Automatic fetching (recommended for many tracks)
+
+If you have the [Spotify-Canvas-API](https://github.com/Paxsenix0/Spotify-Canvas-API) running locally with your `sp_dc` cookie, you can automatically fetch canvases + song metadata:
+
+1. Start the canvas API:
+   ```bash
+   cd ~/Spotify-Canvas-API && node index.js
+   ```
+
+2. Create a file `tracks.txt` with one Spotify track ID per line.
+
+3. Run the auto script:
+   ```bash
+   node scripts/auto-add-canvases.js --input tracks.txt
+   ```
+
+   With auto-import:
+   ```bash
+   node scripts/auto-add-canvases.js --input tracks.txt --auto-import
+   ```
+
+   Or via npm:
+   ```bash
+   npm run auto-add -- --input tracks.txt --auto-import
+   ```
+
+An example file is provided at `tracks.example.txt`.
+
 ## Where to get Canvas URLs
 
 **Legal & sustainable options:**

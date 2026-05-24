@@ -1,0 +1,19 @@
+# tracks-to-fetch.txt
+# One Spotify track ID per line.
+# Lines starting with # are ignored.
+# This file is used by the GitHub Actions workflow for automatic canvas fetching.
+
+# Already added (kept for reference, the script will skip duplicates)
+# 40j4RoqmLiivqzRObbQ4BF   # I Know - Polo G
+# 3OHfY25tqY28d16oZczHc8   # Kill Bill - SZA
+# 4LRPiXqCikLlN15c3yImP7   # As It Was - Harry Styles
+# 7qiZfU4dY1lWllzX7mPBI3   # Shape of You - Ed Sheeran
+
+# Add new track IDs below (popular tracks likely to have canvases)
+0VjIjW4GlUZAMYd2vXMi3b   # Blinding Lights - The Weeknd
+463CkQjx2Zk1yXoBu2pZ7Q   # Levitating - Dua Lipa
+4uLU6hMCjMI75M1A2tKUQC   # Peaches - Justin Bieber ft. Daniel Caesar & Giveon
+02MWAaffLxlfxAUY7c5dvx   # Heat Waves - Glass Animals
+27NovPIUIRrOZoCHxABJwK   # Industry Baby - Lil Nas X ft. Jack Harlow
+
+# Add more Spotify track IDs here (one per line)

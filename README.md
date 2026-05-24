@@ -3,11 +3,11 @@
 Public, no-login-required manifest of Spotify Canvas videos for AuraMusic and other compatible players.
 
 **Official repository:** https://github.com/TeamAuraMusic/AuraMusicCanvas
-**Live endpoint:** https://auramusiccanvas.vercel.app/canvas.json
+**Live endpoint:** https://canvas.auramusic.site/canvas.json
 
 **Endpoint (after deployment):**
 ```
-https://auramusiccanvas.vercel.app/canvas.json
+https://canvas.auramusic.site/canvas.json
 ```
 
 ## Format
@@ -53,7 +53,7 @@ This repository is already set up for Vercel deployment.
 4. Import (or connect) the repo at [Vercel](https://vercel.com/new) → Deploy.
 
 Your manifest will be instantly available at:
-`https://auramusiccanvas.vercel.app/canvas.json`
+`https://canvas.auramusic.site/canvas.json`
 
 ## Adding Canvases
 

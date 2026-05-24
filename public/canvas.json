@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-24T12:45:22.363Z",
+  "updatedAt": "2026-05-24T13:20:50.787Z",
   "items": [
     {
       "song": "Shape of You",
@@ -9,10 +9,22 @@
       "trackId": "7qiZfU4dY1lWllzX7mPBI3"
     },
     {
+      "song": "Heat Waves",
+      "artist": "Glass Animals",
+      "url": "https://canvaz.scdn.co/upload/artist/4yvcSjfu4PC0CYQyLy4wSq/video/42e6e6de5208454d9549f35aaf892a59.cnvs.mp4",
+      "trackId": "02MWAaffLxlfxAUY7c5dvx"
+    },
+    {
       "song": "As It Was",
       "artist": "Harry Styles",
       "url": "https://canvaz.scdn.co/upload/licensor/5bSw7fRotCnRCcO9br14W5/video/042bc6517a764186a0f7116ce8b99ed9.cnvs.mp4",
       "trackId": "4LRPiXqCikLlN15c3yImP7"
+    },
+    {
+      "song": "INDUSTRY BABY (feat. Jack Harlow)",
+      "artist": "Lil Nas X",
+      "url": "https://canvaz.scdn.co/upload/licensor/5bSw7fRotCnRCcO9br14W5/video/95d849b65ba84a1893c20ccfc8e5a8b1.cnvs.mp4",
+      "trackId": "27NovPIUIRrOZoCHxABJwK"
     },
     {
       "song": "I Know",
